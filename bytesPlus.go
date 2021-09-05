@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/encoding/unicode"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -165,6 +166,11 @@ func BytesCombine(pBytes ...[]byte) []byte {
 	return bytes.Join(pBytes, []byte(""))
 }
 
+// 合并多个切片
+func Combine(pBytes ...[]byte) []byte {
+	return bytes.Join(pBytes, []byte(""))
+}
+
 // 切片求和
 func Sum(byt []byte) int {
 	sum := 0
@@ -199,6 +205,13 @@ func CheckSum16(byt []byte) int {
 		sum += int(byt[i])
 	}
 	return sum & 0xFFFF
+}
+
+// sun16校验
+func CheckSum16Byte(byt []byte) []byte {
+	cn := make([]byte, 2)
+	binary.BigEndian.PutUint16(cn, uint16(CheckSum16(byt)))
+	return cn
 }
 
 // CRC modbus校验 返回 int
@@ -313,7 +326,17 @@ func DeBuff(buff, b []byte) [][]byte {
 
 // 字节切片转16进制字符串
 func Hex(byt []byte) string {
-	return fmt.Sprintf("%x", byt)
+	return hex.EncodeToString(byt)
+}
+
+// 4字节切片转浮点数,大端
+func Bytes32ToFloatBe(b []byte) float32 {
+	return math.Float32frombits(binary.BigEndian.Uint32(b))
+}
+
+// 4字节切片转浮点数,小端
+func Bytes32ToFloatLe(b []byte) float32 {
+	return math.Float32frombits(binary.LittleEndian.Uint32(b))
 }
 
 // 将相邻的两个字节进行合并
