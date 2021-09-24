@@ -379,6 +379,53 @@ func Decode(byt []byte, code string) (string, error) {
 		} else {
 			return string(gbkData), nil
 		}
+	case "ABC-BE", "abc-be", "abc", "ABC":
+		l := len(byt)
+		if l < 2 {
+			return "", fmt.Errorf("cannot decode")
+		}
+		s := ""
+		for i := 0; i < l; i = i + 2 {
+			if i+1 >= l {
+				break
+			} else if byt[i] == 0 || byt[i] == 0xff || byt[i+1] == 0 || byt[i+1] == 0xff {
+				break
+			}
+			ss, err := simplifiedchinese.GBK.NewDecoder().Bytes([]byte{byt[i] + 0xA0, byt[i+1] + 0xA0})
+			if err != nil {
+				break
+			}
+			s = s + string(ss)
+		}
+		if len(s) == 0 {
+			return "", fmt.Errorf("cannot decode")
+		} else {
+			return s, nil
+		}
+
+	case "ABC-LE", "abc-le":
+		l := len(byt)
+		if l < 2 {
+			return "", fmt.Errorf("cannot decode")
+		}
+		s := ""
+		for i := 0; i < l; i = i + 2 {
+			if i+1 >= l {
+				break
+			} else if byt[i] == 0 || byt[i] == 0xff || byt[i+1] == 0 || byt[i+1] == 0xff {
+				break
+			}
+			ss, err := simplifiedchinese.GBK.NewDecoder().Bytes([]byte{byt[i+1] + 0xA0, byt[i] + 0xA0})
+			if err != nil {
+				break
+			}
+			s = s + string(ss)
+		}
+		if len(s) == 0 {
+			return "", fmt.Errorf("cannot decode")
+		} else {
+			return s, nil
+		}
 	case "utf8", "utf-8", "UTF8", "UTF-8":
 		return string(byt), nil
 	case "utf-16-le", "utf16le", "UTF-16-LE", "UTF16LE":
